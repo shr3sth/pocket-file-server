@@ -1,86 +1,82 @@
-# 📱 Pocket File Server
+# Pocket File Server (Termux)
 
-A lightweight HTTP file server built with Python and Flask, running directly on an Android phone through Termux. It allows another device on the same local network to browse, download, and stream files through a web browser.
+A small Flask HTTP file server for Android/Termux. It provides authenticated directory browsing, file downloads, browser-based media access, and a basic status panel.
 
-The project explores practical networking, HTTP, authentication, file serving, and basic security testing using everyday hardware.
+## Files
 
-## Features
+- `sd-server.py` — server application.
+- `pocket-server` — one-command launcher.
+- `install.sh` — installs Flask and copies the server and launcher to `~/bin`.
+- `requirements.txt` — Python dependency list.
 
-* **HTTP file sharing:** Browse directories and access files from a web browser.
-* **Authentication:** HTTP Basic authentication with a username and password.
-* **Media streaming:** Stream supported audio and video files through the browser.
-* **Server monitoring:** View uptime, HTTP request count, and storage information.
-* **Directory traversal protection:** Resolve requested paths and restrict access to the configured shared directory.
-* **Lightweight interface:** A responsive file browser and monitoring dashboard.
-* **Android-based hosting:** Runs on an Android phone using Termux.
+## Install on the Android phone
+
+1. Extract this ZIP on the phone.
+2. Open Termux and navigate to the extracted folder.
+3. Grant Termux storage access if you have not already:
+
+   ```bash
+   termux-setup-storage
+   ```
+
+4. Install Python if needed:
+
+   ```bash
+   pkg update
+   pkg install python
+   ```
+
+5. Run the installer from the extracted folder:
+
+   ```bash
+   bash install.sh
+   ```
+
+The default shared directory is `/storage/sdcard1`, matching a secondary SD card on some devices. If your SD card uses a different path, set `SD_SERVER_ROOT` before starting the server, for example:
+
+```bash
+SD_SERVER_ROOT=/storage/your-card-path ~/bin/pocket-server
+```
+
+## Start and stop
+
+Start:
+
+```bash
+~/bin/pocket-server
+```
+
+Enter a username and password when prompted. The password is not stored in this project.
+
+Stop the server with `Ctrl+C`.
+
+The server listens on port `8000` by default. If needed, you can choose another port:
+
+```bash
+SD_SERVER_PORT=8080 ~/bin/pocket-server
+```
+
+Open `http://PHONE-IP:8000` (or the selected port) from a browser on a device connected to the same trusted Wi-Fi/hotspot. Find the phone's current IP address in Android hotspot or network details; it may change after reconnecting.
+
+## Security notes
+
+- This project is intended for learning and trusted local-network demonstrations.
+- HTTP is **not encrypted**. Basic authentication does not protect credentials or file contents from network eavesdropping.
+- Keep authentication enabled and do not configure router port forwarding or expose this server to the public internet.
+- The server shares the configured root directory and its accessible contents. Do not use it while sensitive files are in the shared directory.
+- Flask's built-in development server is used for this small demo; it is not intended as a production deployment.
+
+## Tested behavior
+
+The project was tested with `curl`:
+- Unauthenticated request: HTTP `401`.
+- Authenticated request: HTTP `200`.
+- Directory traversal attempt: HTTP `403`.
+
+File browsing, downloads, media access, and the status panel were also tested in the project environment.
 
 ## Architecture
 
-Android phone (Termux + Python + Flask)
-↓ HTTP over local Wi-Fi/hotspot
-Laptop or another client device (web browser)
-
-## Requirements
-
-* Android phone with Termux
-* Python 3
-* Flask
-* A local Wi-Fi network or personal hotspot
-* A client device with a web browser
-
-## Setup
-
-Install the required packages in Termux:
-
-```bash
-pkg update
-pkg install python
-python -m pip install flask
-termux-setup-storage
-```
-
-Place the server script at `~/bin/sd-server-v2.py` and configure the shared directory in the script to match your storage location.
-
-Start the server:
-
-```bash
-python ~/bin/sd-server-v2.py
-```
-
-Enter the server password when prompted. Open the displayed phone IP address and port in a browser on a device connected to the same network.
-
-Example:
-
-```text
-http://PHONE-IP:8000
-```
-
-The phone's IP address may change when the hotspot reconnects.
-
-## Security and limitations
-
-* Intended for trusted local networks and demonstrations.
-* HTTP traffic is unencrypted; Basic authentication does not encrypt credentials.
-* Anyone who can reach the server may attempt to connect, so authentication must remain enabled.
-* Only the configured shared directory should be exposed.
-* The Flask development server is intended for this small demonstration, not production deployment.
-* Do not expose the server directly to the public internet.
-
-## Testing
-
-The following checks were performed:
-
-* Unauthenticated request returned HTTP 401.
-* Authenticated request returned HTTP 200.
-* A directory traversal attempt was rejected with HTTP 403.
-* File browsing, downloads, media streaming, and the monitoring dashboard were tested.
-
-## Future improvements
-
-Possible future work includes HTTPS or SSH tunnelling, more detailed request logging, and improved server lifecycle management.
-
-## Author
-
-Shresth Dehuliya
-
-Built as a hands-on project to explore Python, Linux command-line tools, HTTP, and practical networking.
+Android phone (Termux + Python + Flask)  
+→ HTTP over local Wi-Fi/hotspot  
+→ Laptop or another client browser
